@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=9" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>用户登录</title>
+</head>
+<body>
+	<div>
+		<div>
+			<input placeholder="用户名" id="username" name="username" type="text"
+				value="">
+		</div>
+		<div>
+			<input placeholder="密码" id="password" name="password" type="password"
+				value="">
+		</div>
+		<input type="button" id="login" name="login" value="登录" onclick="loginFun();">
+	</div>
+</body>
+<!-- jQuery -->
+<script src="js/jquery.min.js"></script>
+<script type="text/javascript">
+function loginFun(){	
+    var username = $("#username").val(); 
+    var password = $("#password").val();
+	    $.ajax({
+    	    url:"/SpringJavaConfigExample/test/test",   
+    	    data:{     
+    	    	username : username,
+    	    	password : password
+    	    },    
+    	    type:"POST",     
+    	    dataType:"text",    
+    	    success:function(data) {
+	    	    if(data == "true"){	  
+	    	    	window.location.href="content.html";
+                }else{                	
+                	alert('用户名或密码错误请重新输入');
+                }
+    	     },    
+    	     error : function(data) {       
+    	    	 alert('系统错误(LOGINSYS001)，请联系系统管理员');    
+    	     }    
+	     });	
+};
+</script>
+</html>
+

@@ -1,0 +1,213 @@
+$(document).ready(function(){
+	if($.cookie("username") == null){
+		window.location.href="login.html";
+	}
+	
+	var id = getUrlParam("id");
+	
+	if(id != 0 && id != null && id !=""){
+		$("#searchImsi").val(id);
+	}
+	
+	$("#timediv").show();
+	$("#timepickdiv").hide();
+	$("#searchBtn2").hide();
+	
+	var d = new Date();
+	var datetime = d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate() + " 00:00 ";
+	
+	$('#start_time').appendDtpicker({
+		"current": datetime
+	});
+	$('#end_time').appendDtpicker({
+		"current": datetime
+	});
+	
+	$('#end_time').trigger('change');
+	$('#start_time').trigger('change');
+	
+	$('#time').change(function(){ 
+		if($("#time").val() == '0'){
+			$("#timepickdiv").show();
+			$("#timediv").hide();
+			$("#searchBtn2").show();
+			$("#searchBtn").hide();
+		}
+	});
+	
+	$("#point").click(function(){
+		if(id == 0 || id == null || id == ""){
+			var imsi = $("#searchImsi").val();
+			
+			if(imsi == ""){
+				alert("请输入电动车GPS硬件IMSI号码");
+			}else{
+				window.location.href = "aboard_vehiclelocation.html?id="+imsi;
+			}
+		}else{
+			window.location.href = "aboard_vehiclelocation.html?id="+id;
+		}
+	});
+	
+	$("#dtrack").click(function(){
+		if(id == 0 || id == null || id == ""){
+			var imsi = $("#searchImsi").val();
+			
+			if(imsi == ""){
+				alert("请输入电动车GPS硬件IMSI号码");
+			}else{
+				window.location.href = "aboard_vehicledynamictrack.html?id="+imsi;
+			}
+		}else{
+			window.location.href = "aboard_vehicledynamictrack.html?id="+id;
+		}
+	});
+});
+
+function getUrlParam(name){  
+    var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");  
+    var r = window.location.search.substr(1).match(reg);  
+    if (r!=null) return unescape(r[2]);  
+    return null;  
+}
+//<===========================================================================================================================>//
+	//<===========================================================================================================================>//
+	//<===========================================================================================================================>//
+//<===========================================================================================================================>//
+var map = new BMap.Map("baidumap");
+var pointsarr = new Array();
+var vinfos = new Array();
+
+map.centerAndZoom(new BMap.Point(116.404, 39.915), 5);
+
+var mapType1 = new BMap.MapTypeControl({mapTypes: [BMAP_NORMAL_MAP,BMAP_HYBRID_MAP]});
+var mapType2 = new BMap.MapTypeControl({anchor: BMAP_ANCHOR_TOP_LEFT});
+
+map.addControl(mapType1);          //2D图，卫星图
+map.addControl(mapType2);          //左上角，默认地图控件
+map.setCurrentCity("北京");        //由于有3D图，需要设置城市哦
+map.enableScrollWheelZoom(true);
+var opts = {
+		width : 250,     // 信息窗口宽度
+		height: 175,     // 信息窗口高度
+		title : "车辆信息" , // 信息窗口标题
+		enableMessage:true//设置允许信息窗发送短息
+	   };
+
+$("#searchBtn").click(function(){
+	var imsi = $("#searchImsi").val();
+	var time = $("#time").val();
+	if(imsi == ""){
+		alert("请输入电动车GPS硬件IMSI号码");
+	}else{
+		map.clearOverlays();
+		pointsarr = [];
+		vinfos = [];
+		
+		$.ajax({
+			type: "POST",
+			async: false,
+			dataType: "json",
+			url: "gps/position/track",
+			data:{    
+		    	  hardware_id : imsi,
+		    	  time : time
+		    }, 
+			success: function(msg){
+				if(msg.state == "false"){
+					alert("未查询到相关数据");
+				}else{
+					var gps = msg.gps;
+					var vinfo = msg.vinfo;
+					$.each(gps, function(i, item){
+						pointsarr.push(new BMap.Point(item.longtitude,item.latitude));
+					});
+					
+		 			$.each(vinfo, function(i, item){
+						vinfos[i] ="硬件IMSI号:"+item.hardware_id+"<br/>"+
+									"车牌号:"+item.bikenum+"<br/>"+
+		                			"车辆速度:"+item.speed+"<br/>"+
+		                			"GPS电量:"+item.power+"<br/>";
+					});
+					
+		 			var polyline = new BMap.Polyline(pointsarr, {strokeColor:"red", strokeWeight:5, strokeOpacity:0.5});   //创建折线
+					
+		 			map.addOverlay(polyline);
+		 			map.setZoom(12);
+		 			map.panTo(pointsarr[0]);
+				}
+			}, 
+			error : function(data) {
+				alert('系统错误(TRACK001)，请联系系统管理员');    
+			}    
+		});
+	}
+});
+
+$("#searchBtn2").click(function(){
+	var imsi = $("#searchImsi").val();
+	var start_time = $("#start_time").val();
+	var end_time = $("#end_time").val();
+
+	if(imsi == ""){
+		alert("请输入电动车GPS硬件IMSI号码");
+	}else if(start_time > end_time){
+		alert("开始时间大于结束时间");
+	}else{
+		map.clearOverlays();
+		pointsarr = [];
+		vinfos = [];
+		
+		$.ajax({
+			type: "POST",
+			async: false,
+			dataType: "json",
+			url: "gps/position/timetrack",
+			data:{    
+		    	  hardware_id : imsi,
+		    	  beginTime : start_time,
+		    	  endTime : end_time
+		    }, 
+			success: function(msg){
+				if(msg.state == "false"){
+					alert("未查询到相关数据");
+				}else{
+					var gps = msg.gps;
+					var vinfo = msg.vinfo;
+					$.each(gps, function(i, item){
+						pointsarr.push(new BMap.Point(item.longtitude,item.latitude));
+						sum++;
+					});
+					
+		 			$.each(vinfo, function(i, item){
+						vinfos[i] ="硬件IMSI号:"+item.hardware_id+"<br/>"+
+									"车牌号:"+item.bikenum+"<br/>"+
+		                			"车辆速度:"+item.speed+"<br/>"+
+		                			"GPS电量:"+item.power+"<br/>";
+					});
+		 			
+		 			var polyline = new BMap.Polyline(pointsarr, {strokeColor:"red", strokeWeight:5, strokeOpacity:0.5});   //创建折线
+					
+		 			map.addOverlay(polyline);
+		 			map.setZoom(12);
+		 			map.panTo(pointsarr[0]);
+				}	
+			}, 
+			error : function(data) {
+				alert('系统错误(TRACK002)，请联系系统管理员');    
+			}    
+		});
+	}
+});
+		
+map.addEventListener("click",function(e){
+	var geoc = new BMap.Geocoder();
+	var point = new BMap.Point(e.point.lng, e.point.lat);
+	geoc.getLocation(point, function(rs){	
+		var addComp = rs.addressComponents;
+		var c = addComp.province + ", " + addComp.city + ", <br/>" + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber;
+		content = vinfos[0]+"当前位置:"+c;
+		var infoWindow = new BMap.InfoWindow(content,opts); 
+		map.openInfoWindow(infoWindow,point);
+	}); 
+});

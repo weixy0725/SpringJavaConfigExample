@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>用户登录</title>
+<title>登录跳转页</title>
+</head>
+<body>
+
+   <div>
+   <h3>已登录</h3>
+   </div>
+   <div>
+   <p>已成功登录跳转</p>
+   </div>
+   <div>
+   <label>存入数据：</label>
+   <input id="datatest"/>
+   <input id="dataflag"/>
+   <input type="button" value="保存数据" onclick="save_Fun();"/>   
+   </div>
+   <div>
+   <label>更新数据：</label>
+   <input id="datat"/>
+   <input id="dataf"/>
+   <input type="button" value="更改数据" onclick="ch_Fun();"/>   
+   </div>
+   <div>
+   <label>查询数据：</label>
+   <input id="datasel"/>
+   <input type="button" value="查询数据" onclick="sel_Fun();"/>  
+   <div id="show"></div>
+   </div>
+</body>
+<!-- jQuery -->
+<script src="js/jquery.min.js"></script>
+<script type="text/javascript">
+function save_Fun(){	
+    var datatest= $("#datatest").val(); 
+    var dataflag= $("#dataflag").val(); 
+	    $.ajax({
+    	    url:"practice/datasave.action",   
+    	    data:{     
+    	    	datatest : datatest,
+    	    	dataflag : dataflag
+    	    },    
+    	    type:"POST",     
+    	    dataType:"json",    
+    	    success:function(data) {
+	    	    if(data.state == "true"){	    
+	    	    	alert("数据存储成功！");
+                }else{                	
+                	alert("数据存储失败！");
+                }
+    	     },    
+    	     error : function(data) {       
+    	    	 alert('系统错误(DATASYS001)，请联系系统管理员');    
+    	     }    
+	     });	
+};
+
+function ch_Fun(){
+	  var datat= $("#datat").val(); 
+	  var dataf= $("#dataf").val(); 
+		    $.ajax({
+	    	    url:"practice/dataupdate.action",   
+	    	    data:{     
+	    	    	datatest : datat,
+	    	    	dataflag : dataf
+	    	    },    
+	    	    type:"POST",     
+	    	    dataType:"json",    
+	    	    success:function(data) {
+		    	    if(data.state == "true"){	    
+		    	    	alert("数据更新成功！");
+	                }else{                	
+	                	alert("数据更新失败！");
+	                }
+	    	     },    
+	    	     error : function(data) {       
+	    	    	 alert('系统错误(DATASYS001)，请联系系统管理员');    
+	    	     }    
+		     });	
+}
+
+function sel_Fun(){
+	var datatt = $("#datasel").val();
+	if(datatt==""||null==datatt){
+		 $.ajax({
+	    	    url:"practice/dataall.action",   
+	    	    data:{     
+	    	    },    
+	    	    type:"POST",     
+	    	    dataType:"json",    
+	    	    success:function(data) {
+		    	    if(data.state == "true"){
+		    	    	$("#show").html("<b>"+data.data[0].datatest+"</b>");
+		    	    	alert("数据查询成功！"); 
+	                }else{                	
+	                	alert("数据查询失败！"); 
+	                }
+	    	     },    
+	    	     error : function(data) {       
+	    	    	 alert('系统错误(DATASYS001)，请联系系统管理员');    
+	    	     }    
+		     });	
+	}else{
+		 $.ajax({
+	    	    url:"practice/dataselect.action",   
+	    	    data:{     
+	    	    	datatest : datatt
+	    	    },    
+	    	    type:"POST",     
+	    	    dataType:"json",    
+	    	    success:function(data) {
+		    	    if(data.state == "true"){	    
+		    	    	$("#show").html("<b>"+data.data.datatest+"</b>");
+	                }else{                	
+	                	alert("数据查询失败！"); 
+	                }
+	    	     },    
+	    	     error : function(data) {       
+	    	    	 alert('系统错误(DATASYS001)，请联系系统管理员');    
+	    	     }    
+		     });	
+	}
+}
+</script>
+</html>

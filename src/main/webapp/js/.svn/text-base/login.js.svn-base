@@ -1,0 +1,37 @@
+$(document).ready(function() {
+	$.cookie('username', null);
+    $("#login").click(function(){
+	    var username = $("#username").val(); 
+	    var password = $("#password").val();
+	    var isAboard = $("#isAboard").val();
+	    if(isAboard == "" || isAboard == null){
+	    	alert("请选择系统版本");
+	    }else{
+		    $.ajax( {    
+	    	    url:"gps/login/login",   
+	    	    data:{     
+	    	    	username : username,
+	    	    	password : password
+	    	    },    
+	    	    type:"POST",     
+	    	    dataType:"json",    
+	    	    success:function(data) {
+    	    	    if(data.state == "true"){
+    	    	    	$.cookie('username', username);
+    	    	    	if(isAboard == "1"){
+    	    	    		window.location.href ="vehiclecontrol.html";
+    	    	    	}else{
+    	    	    		window.location.href ="aboard_vehiclecontrol.html";
+    	    	    	}	
+            	    }else{
+            	    	alert(data); 
+            	    	alert('用户名或密码错误请重新输入');
+                    }
+	    	     },    
+	    	     error : function(data) {       
+	    	    	 alert('系统错误(LOGINSYS001)，请联系系统管理员');    
+	    	     }    
+    	     });	
+	    }
+    });
+}); 

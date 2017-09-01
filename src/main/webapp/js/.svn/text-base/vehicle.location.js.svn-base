@@ -1,0 +1,169 @@
+var map = new BMap.Map("baidumap");
+	
+var markers = [];
+var points = [];
+var vinfos = [];
+
+$(document).ready(function(){
+	if($.cookie("username") == null){
+		window.location.href="login.html";
+	}
+	
+	var id = getUrlParam("id");
+	
+	if(id != 0 && id != null && id !=""){
+		$("#searchImsi").val(id);
+	}
+	
+	add_overlay();
+	
+	$("#track").click(function(){
+		if(id == 0 || id == null || id == ""){
+			var imsi = $("#searchImsi").val();
+			
+			if(imsi == ""){
+				alert("请输入电动车GPS硬件IMSI号码");
+			}else{
+				window.location.href = "vehicletrack.html?id="+imsi;
+			}
+		}else{
+			window.location.href = "vehicletrack.html?id="+id;
+		}
+	});
+	
+	$("#dtrack").click(function(){
+		if(id == 0 || id == null || id == ""){
+			var imsi = $("#searchImsi").val();
+			
+			if(imsi == ""){
+				alert("请输入电动车GPS硬件IMSI号码");
+			}else{
+				window.location.href = "vehicledynamictrack.html?id="+imsi;
+			}
+		}else{
+			window.location.href = "vehicledynamictrack.html?id="+id;
+		}
+	});
+});
+
+map.centerAndZoom(new BMap.Point(116.404, 39.915), 5);
+
+var mapType1 = new BMap.MapTypeControl({mapTypes: [BMAP_NORMAL_MAP,BMAP_HYBRID_MAP]});
+var mapType2 = new BMap.MapTypeControl({anchor: BMAP_ANCHOR_TOP_LEFT});
+
+map.addControl(mapType1);          //2D图，卫星图
+map.addControl(mapType2);          //左上角，默认地图控件
+map.setCurrentCity("北京");        //由于有3D图，需要设置城市哦
+map.enableScrollWheelZoom(true);
+var opts = {
+		width : 250,     // 信息窗口宽度
+		height: 175,     // 信息窗口高度
+		title : "车辆信息" , // 信息窗口标题
+		enableMessage:true//设置允许信息窗发送短息
+	   };
+
+function addClickHandler(content,marker){
+	marker.addEventListener("click",function(e){
+		openInfo(content,e);
+	});
+}
+
+function openInfo(content,e){
+	var p = e.target;
+	var geoc = new BMap.Geocoder();
+	var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+	geoc.getLocation(point, function(rs){	
+		var addComp = rs.addressComponents;
+		var c = addComp.province + ", " + addComp.city + ", <br/>" + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber;
+		content = content+"车辆位置:"+c;
+		var infoWindow = new BMap.InfoWindow(content,opts); 
+		map.openInfoWindow(infoWindow,point);
+	}); 
+}
+
+function callback(xyResults){
+	var xyResult = null;
+	
+	for(var index in xyResults){	
+		xyResult = xyResults[index];
+		
+		if(xyResult.error != 0){continue;}
+		var point = new BMap.Point(xyResult.x, xyResult.y);
+		var marker = new BMap.Marker(point);
+		map.addOverlay(marker);
+		map.setZoom(5);
+		//map.setCenter(point);
+		map.panTo(point);
+		
+		addClickHandler(vinfos[index],marker);
+	}
+}
+
+function getUrlParam(name){  
+    var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");  
+    var r = window.location.search.substr(1).match(reg);  
+    if (r!=null) return unescape(r[2]);  
+    return null;  
+}
+
+function getPoint(hardwareid, version){
+	map.clearOverlays();
+	points = [];
+	vinfos = [];
+	
+	$.ajax({
+		type: "POST",
+		async: false,
+		dataType: "json",
+		url: "gps/position/location",
+		data:{    
+	    	  hardware_id : hardwareid,
+	    	  version : version,
+	    }, 
+		success: function(msg){
+			if(msg.state == "false"){
+				alert("未查询到相关数据");
+			}else{
+				var gps = msg.gps;
+				var vinfo = msg.vinfo;
+				$.each(gps, function(i, item){
+					points[i] = new BMap.Point(item.longtitude,item.latitude);
+				});
+				
+	 			$.each(vinfo, function(i, item){
+					vinfos[i] ="硬件IMSI号:"+item.hardware_id+"<br/>"+
+								"车牌号:"+item.bikenum+"<br/>"+
+	                			"车辆速度:"+item.speed+"<br/>"+
+	                			"GPS电量:"+item.power+"<br/>";
+				});
+			}	
+		}, 
+		error : function(data) {
+			alert('系统错误(LOCATION001)，请联系系统管理员');    
+		}    
+	});
+	
+	setTimeout(function(){
+		BMap.Convertor.transMore(points,0,callback);
+	}, 1000);
+}
+
+function add_overlay(){
+	var hardwareid = getUrlParam("id");
+	var version = "1.1.0";
+	if(hardwareid == "" || hardwareid == null){
+		hardwareid = 0;
+	}
+	
+	getPoint(hardwareid, version);
+}
+
+function searchPoint(){
+	var imsi = $("#searchImsi").val();
+	var version = "1.1.0";
+	if(imsi == ""){
+		alert("请输入电动车GPS硬件IMSI号码");
+	}else{
+		getPoint(imsi, version);
+	}
+}

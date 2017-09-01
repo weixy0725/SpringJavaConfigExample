@@ -1,0 +1,204 @@
+$(document).ready(function() {
+	if($.cookie("username") == null){
+		window.location.href="login.html";
+	}
+	
+	$("#alert-danger").hide();
+	
+	$('#vehicle_dataTables').DataTable({
+		"info" : false,
+		"stateSave": true,
+		"ajax": {
+            "url": "gps/aboardvehicleinfo/all"
+           },
+	 	"columns": [
+	             { "data": "hardware_id" },
+	             { "data": "bikenum" },
+	             { "data": "biketype" },
+	             { "data": "imsi" },
+	             { "data": "flag" },
+	             { "data": "flag" },
+	             { "data": "balarm" },
+	             { "data": "zalarm" }
+	           ],
+		"rowCallback": function(row, data, index ) {
+			var id = data["hardware_id"];
+			var url_l = "aboard_vehiclelocation.html?id="+id;
+			var url_s = "aboard_vehiclescope.html?id="+id;
+			$(row).children("td").eq(4).html("<a href="+url_l+">查询拖拉机位置信息</a><br><a href="+url_s+">设定工作范围</a>");
+			if(data["flag"] == "0"){
+				$(row).children("td").eq(5).html("开启不限速");
+			}else if(data["flag"] == "1"){
+				data["flag"] = "开启限速";
+			}else if(data["flag"] == "2"){
+				data["flag"] = "关闭不限速";
+			}else if(data["flag"] == "3"){
+				data["flag"] = "关闭限速";
+			}else if(data["flag"] == "4"){
+				$(row).children("td").eq(5).html("未绑定");
+			}
+			
+			if(data["balarm"] == "1"){
+				data["balarm"] = "电量低";
+			}else if(data["balarm"] == "2"){
+				data["balarm"] = "断电";
+			}else if(data["balarm"] == "0"){
+				$(row).children("td").eq(6).html("正常");
+			}
+			
+			if(data["zalarm"] == "1"){
+				data["zalarm"] = "非法震动";
+			}else if(data["zalarm"] == "2"){
+				data["zalarm"] = "超出工作范围";
+			}else if(data["zalarm"] == "3"){
+				data["zalarm"] = "超出工作范围(非法震动)";
+			}else if(data["zalarm"] == "0"){
+				$(row).children("td").eq(7).html("工作状态正常");
+			}
+		}
+	}); 
+	
+	$('#vehicle_dataTables tbody').on( 'click', 'tr', function(){   
+		if($(this).hasClass("selction")){
+			$(this).removeClass("selction");
+			$(this).addClass('even');
+		}else{
+			if($("#vehicle_dataTables tr.selction").length == 0){
+				$(this).removeClass('odd');
+				$(this).removeClass('even');
+				$(this).addClass('selction');
+			}else{
+				alert('每次只能选择一辆拖拉机');
+			}
+		}
+    });
+	/*$('#vehicle_dataTables tbody').on( 'click', 'tr', function(){   
+		if($(this).hasClass("selction")){
+			$(this).removeClass("selction");
+			$(this).addClass('even');
+			$("#panel-btn :button").removeAttr("disabled");
+		}else{
+			if($("#vehicle_dataTables tr.selction").length == 0){
+				$(this).removeClass('odd');
+				$(this).removeClass('even');
+				$(this).addClass('selction');
+					                    
+				var state = $(this).children("td").eq(5).html();
+				if(state != "未绑定" && $(this).hasClass("selction") && state != "异常"){
+				$("#bind").attr({"disabled":"disabled"});
+				$("#delete").attr({"disabled":"disabled"});
+				}else if(state == "未绑定" && $(this).hasClass("selction")){
+				$("#limitopen").attr({"disabled":"disabled"});
+				$("#unlimitopen").attr({"disabled":"disabled"});
+				$("#unlimitclose").attr({"disabled":"disabled"});
+				$("#limitclose").attr({"disabled":"disabled"});
+				$("#unbind").attr({"disabled":"disabled"});
+				}else if(state == "异常" && $(this).hasClass("selction")){
+				$("#limitopen").attr({"disabled":"disabled"});
+				$("#unlimitopen").attr({"disabled":"disabled"});
+				$("#unlimitclose").attr({"disabled":"disabled"});
+				$("#limitclose").attr({"disabled":"disabled"});
+				$("#unbind").attr({"disabled":"disabled"});
+				$("#bind").attr({"disabled":"disabled"});
+				}
+			}else{
+				alert('每次只能选择一辆拖拉机');
+			}
+		}
+    });*/
+	
+	$("#add").click(function(){
+		window.location.href = "aboard_vehicleadd.html";
+	});
+	
+	$("#edit").click(function(){
+		var ids = [];
+		$("#vehicle_dataTables tr[class = 'selction']").each(function(i,e) {
+			ids[i] = $(this).children("td").eq(0).html();
+		});
+		
+		if(ids.length == 1){
+			var hardware_id = ids[0];
+			window.location.href = "aboard_vehicleedit.html?id="+hardware_id;
+		}else{
+			alert("每次只能编辑一辆拖拉机的信息");
+			window.location.reload();
+		}
+	});
+	
+	$("#delete").click(function(){
+		var ids = [];
+		$("#vehicle_dataTables tr[class = 'selction']").each(function(i,e) {
+			ids[i] = $(this).children("td").eq(0).html();
+		});
+		
+		if(ids.length == 0){
+			alert('未选择拖拉机');
+		}else{
+			var hardwareids = ids.join(",");
+			
+			$.ajax( {    
+	    	    url:"gps/aboardvehicleinfo/del",   
+	    	    data:{    
+	    	    	hardware_id : hardwareids
+	    	    },    
+	    	    type:"POST", 
+	    	    async: false,
+	    	    dataType:"json",    
+	    	    success:function(data) {    
+	    	        if(data.state == "true"){    
+	    	        	alert('车辆信息删除成功');
+	    	        }else{ 
+	    	        	alert('系统错误(AVEHDEL001)，请联系系统管理员');    
+	    	        }    
+	    	     },    
+	    	     error : function(data) {       
+	    	    	 alert('系统错误(AVEHDEL002)，请联系系统管理员');    
+	    	     }    
+	    	});
+			
+			window.location.reload();
+		}
+	});
+});
+
+function sendcommand(command){
+	alert(command);
+	var ids = [];
+	var imsis = [];
+	$("#vehicle_dataTables tr[class = 'selction']").each(function(i,e) {
+		ids[i] = $(this).children("td").eq(0).html();
+		imsis[i] = $(this).children("td").eq(3).html();
+	});
+	
+	if(ids.length == 0){
+		alert('未选择拖拉机');
+	}else if(ids.length == 1){
+		var hardware_id = ids[0];
+		var imsi = imsis[0];
+		$.ajax( {    
+    	    url:"/gps/vehiclecontrol/sendcommand",   
+    	    data:{    
+    	    	  hardware_id : hardware_id, 
+    	          imsi : imsi,
+    	    	  value : command,
+    	    },    
+    	    type:"POST", 
+    	    async: false,
+    	    dataType:"text",    
+    	    success:function(data) { 
+    	        if(data == "true"){    
+    	        	alert('指令发送成功');
+    	        }else{ 
+    	        	alert('系统错误(AVEHCON001)，请联系系统管理员');    
+    	        }    
+    	     },    
+    	     error : function(data) {       
+    	    	 alert('系统错误(AVEHCON002)，请联系系统管理员');    
+    	     }    
+    	}); 
+	}else{
+		alert('每次只能对一辆拖拉机进行控制');
+	}
+	location.reload();
+}

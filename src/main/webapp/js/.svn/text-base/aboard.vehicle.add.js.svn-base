@@ -1,0 +1,42 @@
+$(document).ready(function() {
+	if($.cookie("username") == null){
+		window.location.href="login.html";
+	}
+	
+	$("#add").click(function(){
+		var hardware_id = $("#hardware_id").val();
+		var bikenum = $("#bikenum").val();
+		var biketype = $("#biketype").val();
+		var imsi = $("#imsi").val();
+		var email = $("#email").val();
+		var flag = $("#flag").val();
+		if(hardware_id != "" && bikenum != "" && biketype != "" && imsi != "" && email != "" && flag != ""){
+			$.ajax( {    
+	    	    url:"gps/aboardvehicleinfo/add",   
+	    	    data:{    
+	    	          hardware_id : hardware_id,  
+	    	          bikenum : bikenum,
+	    	          biketype : biketype,
+	    	          imsi : imsi,
+	    	          email : email,
+	    	          flag : flag
+	    	    },    
+	    	    type:"POST",     
+	    	    dataType:"json",    
+	    	    success:function(data) {
+	    	        if(data.state == "true"){    
+	    	        	alert('添加车辆信息成功');
+	    	        	window.location.href="aboard_vehiclecontrol.html";
+	    	        }else{ 
+	    	        	alert('系统错误(AVEHADD001)，请联系系统管理员');    
+	    	        }    
+	    	     },    
+	    	     error : function(data) {       
+	    	          alert(data);    
+	    	     }    
+	    	}); 
+		}else{
+			alert('数据填写不完整');
+		}
+	});
+});

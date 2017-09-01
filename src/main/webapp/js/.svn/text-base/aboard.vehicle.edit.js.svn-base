@@ -1,0 +1,83 @@
+(function ($) {
+    $.getUrlParam = function (name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) 
+        	return unescape(r[2]); 
+        
+        return null;
+    };
+})(jQuery);
+
+$(document).ready(function() {
+	if($.cookie("username") == null){
+		window.location.href="login.html";
+	}
+	
+	var hardware_id = $.getUrlParam('id');
+
+	if(hardware_id != ""){
+		$.ajax( {    
+    	    url:"gps/aboardvehicleinfo/"+hardware_id,     
+    	    type:"GET",     
+    	    dataType:"json",    
+    	    success:function(msg) { 
+    	    	
+    	        if(msg.user == "false"){    
+    	        	alert('系统错误(AVEHINFO001)，请联系系统管理员');
+    	        }else{ 
+    	        	var vinfo = msg.user; 
+    	        	$.each(vinfo, function(i, item){
+    	        		$("#hardware_id").val(item.hardware_id);
+    	        		$("#bikenum").val(item.bikenum);
+    	        		$("#biketype").val(item.biketype);
+    	        		$("#imsi").val(item.imsi);
+    	        		if(item.flag != "4"){
+							$("#imsi").attr("disabled", "disabled");
+						}
+    	        		$("#email").val(item.email);
+    	        		$("#flag").val(item.flag); 
+    				});
+    	        }    
+    	     },    
+    	     error : function(data) {       
+    	    	 alert('系统错误(AVEHINFO001)，请联系系统管理员');    
+    	     }    
+    	}); 
+	}
+	
+	$("#edit").click(function(){
+		var hardware_id = $("#hardware_id").val();
+		var bikenum = $("#bikenum").val();
+		var biketype = $("#biketype").val();
+		var imsi = $("#imsi").val();
+		var email = $("#email").val();
+		if(hardware_id != "" && bikenum != "" && biketype != "" && imsi != "" && email != ""){
+			$.ajax( {    
+	    	    url:"gps/vehicleinfo/edit",   
+	    	    data:{    
+	    	          hardware_id : hardware_id,  
+	    	          bikenum : bikenum,
+	    	          biketype : biketype,
+	    	          imsi : imsi,
+	    	          email : email
+	    	    },    
+	    	    type:"POST",     
+	    	    dataType:"json",    
+	    	    success:function(data) {
+	    	        if(data.state == "true"){    
+	    	        	alert('编辑车辆信息成功');
+	    	        	window.location.href="aboard_vehiclecontrol.html";
+	    	        }else{ 
+	    	        	alert('系统错误(AVEHEDIT001)，请联系系统管理员');    
+	    	        }    
+	    	     },    
+	    	     error : function(data) {       
+	    	    	 alert('系统错误(AVEHEDIT002)，请联系系统管理员');     
+	    	     }    
+	    	}); 
+		}else{
+			alert('数据填写不完整');
+		}
+	});
+});

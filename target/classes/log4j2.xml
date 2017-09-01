@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<!-- status : 这个用于设置log4j2自身内部的信息输出,可以不设置,当设置成trace时,会看到log4j2内部各种详细输出 monitorInterval
+: Log4j能够自动检测修改配置文件和重新配置本身, 设置间隔秒数。如：monitorInterval="600" -->
+<Configuration status="WARN">
+	<Properties>
+		<!-- 日志路径  web.xml中需指定servlet3.0 ${web:rootDir}才可以获取到web项目的路径-->
+		<Property name="LOG_HOME">${web:rootDir}/logs</Property>
+		<!-- 日志名字 -->
+		<Property name="LOG_NAME">SpringJavaConfigExample</Property>
+	</Properties>
+	<Appenders>
+		<!-- 将日志信息从控制台输出 -->
+		<Console name="Console" target="SYSTEM_OUT">
+			<!-- 控制台只输出level及以上级别的信息(onMatch-匹配ACCEPT接受),其他的直接拒绝(onMismatch-不匹配DENY拒绝) -->
+			<!-- <ThresholdFilter level="trace" onMatch="ACCEPT" onMismatch="DENY"/> -->
+			<!-- 输出日志的格式 -->
+			<PatternLayout
+			pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level [%logger{36}.%M,%L] - %msg%n" />
+		</Console>
+		<!-- 将日志信息写入日志文件 配置了RollingRandomAccessFile就不用配置此处了-待测试 -->
+		<!-- <File name="File" filename="${LOG_HOME}/${LOG_NAME}.log" append="true">
+		<PatternLayout pattern="%d %p %C{1.} [%t] %m%n" /> </File> -->
+		<!-- 分割日志 -->
+		<RollingRandomAccessFile name="RollingFile"
+		fileName="${LOG_HOME}/${LOG_NAME}" filePattern="${LOG_HOME}/${LOG_NAME}.%d{yyyy-MM-dd}.log">
+			<PatternLayout
+			pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level [%logger{36}.%M,%L] - %msg%n" />
+			<Policies>
+				<!-- 按天分割日志，interval以小时设置， modulate=true，则封存时间将以0点为边界进行偏移计算 -->
+				<TimeBasedTriggeringPolicy modulate="true"
+				interval="24" />
+				<!-- 按日志大小分割日志，可以与按时间分割共用，满足其中一个条件即分割 -->
+				<!-- <SizeBasedTriggeringPolicy size="200 MB" /> -->
+			</Policies>
+			<DefaultRolloverStrategy />
+		</RollingRandomAccessFile>
+	</Appenders>
+	<Loggers>
+		<!-- 避免日志重复写入,将框架相关的包单独设置 additivity="false" 不设置会重复打印日志 -->
+		<logger name="org.springframework.core" level="info"
+		additivity="false"></logger>
+		<logger name="org.springframework.beans" level="info"
+		additivity="false"></logger>
+		<logger name="org.springframework.context" level="info"
+		additivity="false"></logger>
+		<logger name="org.springframework.web" level="info" additivity="false"></logger>
+		<logger name="org.springframework.webmvc" level="info" additivity="false"></logger>
+		<logger name="org.springframework.test" level="info" additivity="false"></logger>
+		<logger name="org.springframework.amqp" level="info" additivity="false"></logger>
+		<!-- Root level 是设置全局的信息显示级别，这里设置为error表示：error及以上的信息将被输出 信息的级别大小为： debug
+		< info < warn < error < fatal -->
+		<Root level="info">
+			<!-- 仅有上述的Appenders配置还不够，这里还不能少，少了就不会在控制台输出 -->
+			<AppenderRef ref="Console" />
+			<!-- 仅有上述的Appenders配置还不够，这里还不能少，少了就不会写入文件，但会创建文件 -->
+			<!-- <AppenderRef ref="File" /> -->
+			<AppenderRef ref="RollingFile" />
+		</Root>
+		<!-- 可以专门为某个类指定信息级别，例如为main包下的Main类指定信息级别为trace -->
+		<!-- <Logger name="main.Main" level="trace" /> -->
+	</Loggers>
+</Configuration>

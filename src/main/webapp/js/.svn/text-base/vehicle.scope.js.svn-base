@@ -1,0 +1,203 @@
+$(document).ready(function() {
+	if($.cookie("username") == null){
+		window.location.href="login.html";
+	}
+});
+
+var map = new BMap.Map("baidumap");
+var point;
+var lat = 40.057031;
+var lng = 116.307852;
+
+var points = [];
+var positions = [];
+var polygons = [];
+var overlays = [];
+
+var j = 0;
+
+var id = getUrlParam("id");
+
+$.ajax({
+	type: "post",
+	async: false,
+	dataType: "json",
+	url: "gps/scope/getscope",
+	data:{    
+    	  hardware_id : id,
+    }, 
+	success: function(msg){
+		var polygon = msg.polygon;
+		if(polygon[0].hardware_id != "-"){
+			lat = polygon[0].latitude;
+			lng = polygon[0].longtitude;
+		}
+		
+		point = new BMap.Point(lng, lat);
+		
+		map.centerAndZoom(point, 11);
+		
+		var mapType2 = new BMap.MapTypeControl({anchor: BMAP_ANCHOR_TOP_LEFT});
+		
+		map.addControl(mapType2);          //左上角，默认地图控件
+		map.setCurrentCity("北京");        //由于有3D图，需要设置城市哦
+		map.enableScrollWheelZoom(true);
+		
+		if(polygon[0].hardware_id != "-"){
+			$.each(polygon, function(i, item){
+				polygons[i] = new BMap.Point(item.longtitude,item.latitude);
+			});
+		}
+	}, 
+	error : function(data) {
+		alert('系统错误(GETSCOPE001)，请联系系统管理员');    
+	}    
+});
+
+var polygon = new BMap.Polygon(polygons, {strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5}); 
+map.addOverlay(polygon);
+
+var polygoncomplete = function(e){
+	overlays.push(e.overlay);
+	var pointsArr = e.getPath();
+	
+	for(var i = 0; i < pointsArr.length; i++){
+		var p = new Point(pointsArr[i].lng, pointsArr[i].lat);
+		points.push(p);
+	}
+};
+
+var styleOptions = {
+	strokeColor:"blue",    //边线颜色。
+	fillColor:"blue",      //填充颜色。当参数为空时，圆形将没有填充效果。
+	strokeWeight: 3,       //边线的宽度，以像素为单位。
+	strokeOpacity: 0.8,	   //边线透明度，取值范围0 - 1。
+	fillOpacity: 0.6,      //填充的透明度，取值范围0 - 1。
+	strokeStyle: 'solid' //边线的样式，solid或dashed。
+};
+
+//实例化鼠标绘制工具
+var drawingManager = new BMapLib.DrawingManager(map, {
+	isOpen: false, //是否开启绘制模式
+	enableDrawingTool: true, //是否显示工具栏
+	drawingToolOptions: {
+		anchor: BMAP_ANCHOR_TOP_RIGHT, //位置
+		offset: new BMap.Size(5, 5), //偏离值
+		drawingModes :  [
+		                BMAP_DRAWING_MARKER,
+		                BMAP_DRAWING_POLYGON
+		             ],
+	},
+	polygonOptions: styleOptions, //多边形的样式
+});
+
+//添加鼠标绘制工具监听事件，用于获取绘制结果
+drawingManager.addEventListener('polygoncomplete', polygoncomplete);
+
+$.ajax({
+	type: "POST",
+	async: false,
+	dataType: "json",
+	url: "gps/scope/baiducoords",
+	data:{    
+    	  hardware_id : id,  
+    }, 
+	success: function(msg){
+		if(msg.state == "false"){
+			alert("未查询到相关数据");
+		}else{
+			position = new BMap.Point(msg.gps.lng, msg.gps.lat);
+			
+			var ply;
+			if(overlays.length ==0){
+				ply = polygon;
+			}else{
+				ply = overlays[0];
+			}
+			var tt = BMapLib.GeoUtils.isPointInPolygon(position, ply);
+			if(tt == false){
+				alert("当前车辆超出工作范围,硬件编号为："+id);
+			}
+		}	
+	}, 
+	error : function(data) {
+		alert('系统错误(GETSCOPE002)，请联系系统管理员');    
+	}    
+});
+//<===========================================================================================================================>//
+	//<===========================================================================================================================>//
+	//<===========================================================================================================================>//
+//<===========================================================================================================================>//
+function getUrlParam(name){  
+    var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");  
+    var r = window.location.search.substr(1).match(reg);  
+    if (r!=null) return unescape(r[2]);  
+    return null;  
+}
+
+function clearAll() {
+	for(var i = 0; i < overlays.length; i++){
+		map.removeOverlay(overlays[i]);
+	}
+	
+	map.removeOverlay(polygon);
+	overlays.length = 0;
+	points = [];
+	polygons = [];
+}
+
+function Point(lng, lat){
+	this.lng = lng;
+	this.lat = lat;
+}
+
+function commitPolygon(){
+	if(points == [] || points.length <= 2){
+		alert("请正确设定工作区域");
+	}else{
+		var pointsstr = JSON.stringify(points);
+
+		$.ajax({
+			type: "post",
+			async: false,
+			dataType: "json",
+			url: "gps/scope/commitscope",
+			data:{    
+		    	  data : pointsstr, 
+		    	  hardware_id : id,
+		    }, 
+			success: function(msg){
+				if(msg.state == "true"){
+					alert('拖拉机工作范围设定成功');    	
+				}
+			}, 
+			error : function(data) {
+				alert('系统错误(COMMITSCOPE001)，请联系系统管理员');    
+			}    
+		});
+	}
+
+	location.reload();
+}
+
+function deletePolygon(){
+	$.ajax({
+		type: "post",
+		async: false,
+		dataType: "json",
+		url: "gps/scope/delscope",
+		data:{    
+	    	  hardware_id : id,
+	    }, 
+		success: function(msg){
+			if(msg.state == "true"){
+				alert('拖拉机工作范围删除成功');    	
+			}
+		}, 
+		error : function(data) {
+			alert('系统错误(DELSCOPE001)，请联系系统管理员');    
+		}    
+	});
+	
+	location.reload();
+}
