@@ -13,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  */
 @Configuration // Java 配置类
 @EnableWebMvc // 启动Spring MVC特性
-//指定bean的自动发现机制作用的范围,被@Controller等注解修饰的web的bean将被发现并加载到spring mvc应用容器 
+// 指定bean的自动发现机制作用的范围,被@Controller等注解修饰的web的bean将被发现并加载到spring mvc应用容器
 @ComponentScan("com.example.web")
 public class WebConfig extends WebMvcConfigurerAdapter {
 
@@ -23,7 +23,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 	 * @Bean public ViewResolver viewResolver() { InternalResourceViewResolver
 	 * resolver = new InternalResourceViewResolver();
 	 * resolver.setPrefix("/WEB-INF/views/"); resolver.setSuffix(".jsp");
-	 * //可以在JSP页面中通过${}访问beans resolver.setExposeContextBeansAsAttributes(true);
+	 * resolver.setExposeContextBeansAsAttributes(true);//可以在JSP页面中通过${}访问beans
 	 * return resolver; }
 	 */
 

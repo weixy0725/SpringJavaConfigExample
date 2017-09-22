@@ -1,7 +1,13 @@
 package com.example.common.config;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import com.example.java.listener.ForConsumerListener;
 import com.example.springsession.config.HttpSessionConfig;
 
 /**
@@ -10,6 +16,22 @@ import com.example.springsession.config.HttpSessionConfig;
  * @time 2017年8月31日 上午10:07:28
  */
 public class WebInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+	@Override
+	public void onStartup(ServletContext servletContext) throws ServletException {
+		WebApplicationContext rootAppContext = createRootApplicationContext();
+		if (rootAppContext != null) {
+			ContextLoaderListener listener = new ContextLoaderListener(rootAppContext);
+			listener.setContextInitializers(getRootApplicationContextInitializers());
+			servletContext.addListener(listener);
+			//配置ServletContextListener用于启动消费者线程
+			servletContext.addListener(new ForConsumerListener());
+		} else {
+			logger.debug("No ContextLoaderListener registered, as "
+					+ "createRootApplicationContext() did not return an application context");
+		}
+		registerDispatcherServlet(servletContext);
+	}
 
 	/*
 	 * 获取Spring应用容器的配置文件: RootConfig.class为基础的Spring容器配置文件；

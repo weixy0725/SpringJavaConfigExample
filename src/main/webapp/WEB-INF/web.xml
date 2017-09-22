@@ -4,6 +4,6 @@
                       http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 	<display-name>SpringJavaConfigExample</display-name>
 	<welcome-file-list>
-		<welcome-file>login.html</welcome-file>
+		<welcome-file>views/login.html</welcome-file>
 	</welcome-file-list>
 </web-app>

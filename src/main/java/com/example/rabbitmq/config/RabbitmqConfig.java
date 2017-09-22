@@ -33,7 +33,7 @@ import com.example.rabbitmq.util.FastJsonMessageConverter;
  * @author xinyuan.wei
  * @time 2017年8月23日 下午2:46:01
  */
-@Configuration
+//@Configuration
 @PropertySource(value = { "classpath:rabbitmq.properties" })
 public class RabbitmqConfig {
 	 
