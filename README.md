@@ -7,30 +7,3 @@
 预装工具:apache-maven-3.3.9 Redis-x64-3.0.504 RabbitMQ-3.6.5 zookeeper-3.4.10 kafka-0.11.0.0
 应用框架：Spring-4.3.7.RELEASE 
 ## 目录结构
-	
-	┌─.settings
-	│
-	├─src
-	│	├─main 
-	│    
-	│
-	│
-	│
-	│
-	│
-	│
-	│
-	│
-	│
-	│
-	│
-	│
-	├─target
-	│
-	├─.classpath	
-	│
-	├─.project
-	│
-	├─pom.xml
-	│
-	└─README.md
