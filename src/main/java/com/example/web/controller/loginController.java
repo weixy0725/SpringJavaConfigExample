@@ -18,8 +18,16 @@ public class loginController {
 
 	@RequestMapping(value = "/test", method = RequestMethod.POST, produces = "application/text;charset=UTF-8")
 	@ResponseBody
-	public String RabbitMQTest(@RequestParam(value = "username") String username,
+	public String httpSessionTest(@RequestParam(value = "username") String username,
 			@RequestParam(value = "password") String password, HttpSession session) {
+		log.info("sessionId:{}", session.getId());
+		return "true";
+	}
+
+	@RequestMapping(value = "/test2", method = RequestMethod.POST, produces = "application/text;charset=UTF-8")
+	@ResponseBody
+	public String httpSessionTest2(@RequestParam(value = "datatest") String datatest,
+			@RequestParam(value = "dataflag") String dataflag, HttpSession session) {
 		log.info("sessionId:{}", session.getId());
 		return "true";
 	}

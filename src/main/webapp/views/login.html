@@ -24,22 +24,25 @@
 	</div>
 </body>
 <!-- jQuery -->
-<script src="js/jquery.min.js"></script>
+<script src="../js/jquery.min.js"></script>
 <script type="text/javascript">
 function loginFun(){	
     var username = $("#username").val(); 
     var password = $("#password").val();
 	    $.ajax({
-    	    url:"/SpringJavaConfigExample/test/test",   
+    	    url:"/SpringJavaConfigExample/httpsession/test",   
     	    data:{     
     	    	username : username,
     	    	password : password
     	    },    
     	    type:"POST",     
     	    dataType:"text",    
-    	    success:function(data) {
+    	    success:function(data,status,xhr) {
 	    	    if(data == "true"){	  
-	    	    	window.location.href="content.html";
+	    	    	var header = xhr.getResponseHeader('x-auth-token');
+	    	    	alert(header);
+	    	    	document.cookie="x-auth-token="+header;
+	    	    	window.location.href="../views/content.html";
                 }else{                	
                 	alert('用户名或密码错误请重新输入');
                 }

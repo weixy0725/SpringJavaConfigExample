@@ -7,6 +7,7 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import com.example.java.filter.SessionFilter;
 import com.example.java.listener.ForConsumerListener;
 import com.example.springsession.config.HttpSessionConfig;
 
@@ -26,6 +27,7 @@ public class WebInitializer extends AbstractAnnotationConfigDispatcherServletIni
 			servletContext.addListener(listener);
 			//配置ServletContextListener用于启动消费者线程
 			servletContext.addListener(new ForConsumerListener());
+			servletContext.addFilter("sessionfilter", new SessionFilter()).addMappingForUrlPatterns(null, true, "/*");
 		} else {
 			logger.debug("No ContextLoaderListener registered, as "
 					+ "createRootApplicationContext() did not return an application context");
@@ -39,7 +41,7 @@ public class WebInitializer extends AbstractAnnotationConfigDispatcherServletIni
 	 */
 	@Override
 	protected Class<?>[] getRootConfigClasses() {
-		return new Class<?>[] { RootConfig.class, HttpSessionConfig.class };
+		return new Class<?>[] { RootConfig.class};//, HttpSessionConfig.class };
 	}
 
 	// 获取Spring MVC应用容器的配置文件:WebConfig.class为基础的Spring MVC应用容器的配置文件；

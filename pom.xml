@@ -22,6 +22,8 @@
 		<log4j.version>2.7</log4j.version>
 		<json-lib.version>2.4</json-lib.version>
 		<kafka.version>0.11.0.0</kafka.version>
+		<zookeeper.version>3.4.10</zookeeper.version>
+		<grpc.version>1.7.0</grpc.version>
 	</properties>
 	<!-- 配置spring-framework-bom 统一引用Spring依赖的版本 -->
 	<dependencyManagement>
@@ -68,7 +70,7 @@
 			<scope>test</scope>
 		</dependency>
 		<!-- Spring Session 依赖包 -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.springframework.session</groupId>
 			<artifactId>spring-session-data-redis</artifactId>
 			<version>${spring-session-data-redis.version}</version>
@@ -82,7 +84,7 @@
 			<groupId>io.reactivex</groupId>
 			<artifactId>rxjava</artifactId>
 			<version>${rxjava.java}</version>
-		</dependency>
+		</dependency> -->
 		<!-- Spring Session 依赖包结束 -->
 		<!-- RabbitMQ 依赖包 -->
 		<dependency>
@@ -151,9 +153,47 @@
 			<version>${kafka.version}</version>
 		</dependency>
 		<!-- kafka java api 依赖包结束 -->
+		<!-- zookeeper java api 依赖包 -->
+		<dependency>
+			<groupId>org.apache.zookeeper</groupId>
+			<artifactId>zookeeper</artifactId>
+			<version>${zookeeper.version}</version>
+		</dependency>
+		<!-- zookeeper java api 依赖包结束 -->
+		<!-- grpc的依赖包开始 -->
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-netty</artifactId>
+			<version>${grpc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-protobuf</artifactId>
+			<version>${grpc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-stub</artifactId>
+			<version>${grpc.version}</version>
+		</dependency>
+		<!-- grpc的依赖包结束 -->
+		<!-- 引入netty -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>4.1.17.Final</version>
+		</dependency>
+		<!-- 引入netty结束 -->
 	</dependencies>
 	<build>
 		<finalName>SpringJavaConfigExample</finalName>
+		<extensions>
+			<extension>
+				<groupId>kr.motd.maven</groupId>
+				<artifactId>os-maven-plugin</artifactId>
+				<version>1.5.0.Final</version>
+			</extension>
+		</extensions>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -162,6 +202,24 @@
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.xolstice.maven.plugins</groupId>
+				<artifactId>protobuf-maven-plugin</artifactId>
+				<version>0.5.0</version>
+				<configuration>
+					<protocArtifact>com.google.protobuf:protoc:3.4.0:exe:${os.detected.classifier}</protocArtifact>
+					<pluginId>grpc-java</pluginId>
+					<pluginArtifact>io.grpc:protoc-gen-grpc-java:1.7.0:exe:${os.detected.classifier}</pluginArtifact>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>compile-custom</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

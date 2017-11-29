@@ -5,6 +5,9 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test/resource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/target/generated-sources/protobuf/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/target/generated-sources/protobuf/grpc-java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/proto"/>
         <property name="context-root" value="SpringJavaConfigExample"/>
         <property name="java-output-path" value="/SpringJavaConfigExample/target/classes"/>
     </wb-module>
