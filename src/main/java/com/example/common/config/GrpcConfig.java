@@ -38,12 +38,12 @@ public class GrpcConfig {
 	*/
 	
 	@Bean(name = "GrpcTestFutureClient")
-	public GrpcTestFutureClient GrpcTestFutureClient() {
+	public GrpcTestFutureClient getGrpcTestFutureClient() {
 		return new GrpcTestFutureClient("127.0.0.1", 50053);
 	}
 
 	@Bean(name = "GrpcTestFutureServer")
-	public GrpcTestFutureServer GrpcTestFutureServer() {
+	public GrpcTestFutureServer getGrpcTestFutureServer() {
 		return new GrpcTestFutureServer();
 	}
 

@@ -41,7 +41,7 @@ public class RabbitMQConsumerCustom implements MessageQueueConsumer {
 		}
 	}
 
-	private Map<String, Object> FactoryMapProperties() {
+	private Map<String, Object> factoryMapProperties() {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("host", rabbitmqProperties.getProperty("rabbitmq.host"));
 		map.put("port", rabbitmqProperties.getProperty("rabbitmq.port"));
@@ -51,7 +51,7 @@ public class RabbitMQConsumerCustom implements MessageQueueConsumer {
 	@Override
 	public void receiveMessage() {
 		ConnectionFactory factory = new ConnectionFactory();
-		factory.setClientProperties(FactoryMapProperties());
+		factory.setClientProperties(factoryMapProperties());
 		try {
 			Connection connection = factory.newConnection();
 			Channel channel = connection.createChannel();

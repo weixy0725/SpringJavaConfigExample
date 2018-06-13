@@ -14,6 +14,7 @@ public class RabbitMQConsumer implements MessageListener {
 
 	private static final Logger log = LoggerFactory.getLogger(RabbitMQConsumer.class);
 
+	@Override
 	public void onMessage(Message message) {
 		String data = new String(message.getBody());
 		log.info("rabbitMQ consumer receive message：{}",data);

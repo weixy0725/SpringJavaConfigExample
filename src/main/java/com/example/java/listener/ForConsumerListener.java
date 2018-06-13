@@ -52,9 +52,9 @@ public class ForConsumerListener implements ServletContextListener {
 
 		new Thread(GrpcTestAsyncServer).start();*/
 		
-		GrpcTestFutureServer GrpcTestFutureServer = (GrpcTestFutureServer) springContext.getBean("GrpcTestFutureServer");
+		GrpcTestFutureServer grpcTestFutureServer = (GrpcTestFutureServer) springContext.getBean("GrpcTestFutureServer");
 
-		new Thread(GrpcTestFutureServer).start();
+		new Thread(grpcTestFutureServer).start();
 
 	}
 

@@ -48,11 +48,13 @@ public class KafkaProducerCustom implements MessageQueueProducer {
 	}
 
 	@SuppressWarnings("hiding")
+	@Override
 	public <String> void sendMessage(String message) {
 		Producer<String, String> producer = new KafkaProducer<String, String>(producerProperties());
 		ProducerRecord<String, String> record = new ProducerRecord<String, String>(
 				kafkaProperties.getProperty("kafka.topic"), message);
 		producer.send(record, new Callback() {
+			@Override
 			public void onCompletion(RecordMetadata metadata, Exception e) {
 				if (e != null) {
 					log.warn("send record error {}", e);

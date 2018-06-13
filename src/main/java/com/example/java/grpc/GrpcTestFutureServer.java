@@ -21,7 +21,7 @@ public class GrpcTestFutureServer implements Runnable{
 	private Server server;
 	
 	@Autowired
-	private GrpcConnectionManager<String, StreamObserver<HelloReply>>  GrpcConnectionManager;
+	private GrpcConnectionManager<String, StreamObserver<HelloReply>>  grpcConnectionManager;
 	
 	
 	private void start() throws IOException {
@@ -67,7 +67,7 @@ public class GrpcTestFutureServer implements Runnable{
 		@Override
 		public void sayHello(HelloRequest req, StreamObserver<HelloReply> responseObserver) {
 			try {
-			GrpcConnectionManager.put(req.getName(), responseObserver);	
+			grpcConnectionManager.put(req.getName(), responseObserver);	
 			}catch(Exception e) {
 				log.error(e.getMessage(), e);
 			}

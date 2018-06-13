@@ -10,7 +10,7 @@ public class runTest implements Runnable{
 	private StreamObserver<HelloReply> reply = null;
 	
 	@Resource(name = "GrpcConnectionManager")
-	private GrpcConnectionManager<String, Object> GrpcConnectionManager;
+	private GrpcConnectionManager<String, Object> grpcConnectionManager;
 
 	public runTest(HelloRequest hello,StreamObserver<HelloReply> res) {
 		hr = hello;
@@ -19,7 +19,7 @@ public class runTest implements Runnable{
 
 	@Override
 	public void run() {
-		GrpcConnectionManager.put(hr.getName(), reply);		
+		grpcConnectionManager.put(hr.getName(), reply);		
 	}
 
 }

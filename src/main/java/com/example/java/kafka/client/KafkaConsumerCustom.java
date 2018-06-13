@@ -48,6 +48,7 @@ public class KafkaConsumerCustom implements MessageQueueConsumer {
 	}
 
 	// 自动提交偏移量
+	@Override
 	public void receiveMessage() {
 
 		KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(producerProperties());
